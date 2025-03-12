@@ -1,4 +1,5 @@
 from random import randint, choice
+from xml.sax.handler import property_xml_string
 
 
 class GameEntity:
@@ -81,21 +82,62 @@ class Warrior(Hero):
         super().__init__(name, health, damage, 'CRITICAL_DAMAGE')
 
     def apply_super_power(self, boss: Boss, heroes: list):
-        crit = self.damage * randint(2, 5) # 2,3,4
+        crit = self.damage * randint(2, 5)
         boss.health -= crit
         print(f'Warrior {self.name} hit critically: {crit}')
 
-
-class Magic(Hero):
-    def __init__(self, name, health, damage):
-        super().__init__(name, health, damage, 'BOOSTING')
+class Witcher(Hero):
+    def __init__(self, name, health, damage=0):
+        super().__init__(name, health, damage, "REVIVE")
+        self.__revive_used = False
 
     def apply_super_power(self, boss: Boss, heroes: list):
-        pass
-        # TODO Here will be implementation of boosting
+        if not self.__revive_used:
+            for hero in heroes:
+                if hero.health == 0:
+                    hero.health = self.health
+                    self.health = 0
+                    self.__revive_used = True
+                    print(f'Witcher {self.name} sacrificed himself to revive {hero.name}')
+                    break
 
-class Hucker(Hero):
-    pass
+    @property
+    def health(self):
+        return self._GameEntity__health
+
+    @health.setter
+    def health(self, value):
+        self._GameEntity__health = value  # Теперь сеттер работает правильно
+
+
+class Magic(Hero):
+    def __init__(self, name, health, damage, boost_amount):
+        super().__init__(name, health, damage, 'BOOSTING')
+        self.boost_amount = boost_amount
+        self.rounds_boosted = 0
+
+    def apply_super_power(self, boss: Boss, heroes: list):
+        if self.rounds_boosted < 4:
+            for hero in heroes:
+                if hero.health > 0 and hero != self:
+                    hero.damage += self.boost_amount
+            self.rounds_boosted += 1
+            print(f'Magic {self.name} boosted all heroes by {self.boost_amount}')
+
+class Hacker(Hero):
+    def __init__(self, name, health, damage, steal_amount):
+        super().__init__(name, health, damage, 'HEALTH_STEAL')
+        self.steal_amount = steal_amount
+        self.round_counter = 0
+
+    def apply_super_power(self, boss: Boss, heroes: list):
+        self.round_counter += 1
+        if self.round_counter % 2 == 0 and boss.health > self.steal_amount:
+            hero_to_heal = choice([h for h in heroes if h.health > 0 and h != self])
+            boss.health -= self.steal_amount
+            hero_to_heal.health += self.steal_amount
+            print(f'Hacker {self.name} stole {self.steal_amount} health from Boss and gave it to {hero_to_heal.name}')
+
 class Medic(Hero):
     def __init__(self, name, health, damage, heal_points):
         super().__init__(name, health, damage, 'HEAL')
@@ -167,12 +209,15 @@ def start_game():
 
     warrior_1 = Warrior('Django', 280, 10)
     warrior_2 = Warrior('Billy', 270, 15)
-    magic = Magic('Dulittle', 290, 10)
+    magic = Magic('Dulittle', 290, 10,5)
     doc = Medic('James', 250, 5, 15)
     assistant = Medic('Marty', 300, 5, 5)
     berserk = Berserk('William', 260, 10)
+    hacker = Hacker('Anonimus',250,10,30)
+    witcher = Witcher('Gerakl',300,0)
 
-    heroes_list = [warrior_1, doc, warrior_2, magic, berserk, assistant]
+
+    heroes_list = [warrior_1, doc, warrior_2, magic, berserk, assistant,hacker, witcher]
 
     show_statistics(boss, heroes_list)
     while not is_game_over(boss, heroes_list):
