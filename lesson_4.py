@@ -94,7 +94,8 @@ class Magic(Hero):
         pass
         # TODO Here will be implementation of boosting
 
-
+class Hucker(Hero):
+    pass
 class Medic(Hero):
     def __init__(self, name, health, damage, heal_points):
         super().__init__(name, health, damage, 'HEAL')
