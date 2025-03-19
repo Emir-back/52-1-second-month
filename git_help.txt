@@ -35,4 +35,4 @@ git checkout <name> - переключение на ветку под назва
 git checkout -b <name> - создает новую ветку с именем <name> и сразу переключает вас на неё.
 git branch --delete <name> - удаляет ветку локально
 git push origin --delete <name> - удаляет ветку в репозитории
-git merge <name> - сливает изменения из ветки <name> в текущую ветку.
+git merge <name> - сливает изменения из ветки <name> в текущую ветку...
